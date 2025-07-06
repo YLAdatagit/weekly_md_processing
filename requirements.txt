@@ -1,0 +1,6 @@
+pandas
+geopandas
+shapely
+psycopg2
+python-dotenv
+rarfile
