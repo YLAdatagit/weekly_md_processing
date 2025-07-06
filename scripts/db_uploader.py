@@ -13,7 +13,7 @@ def upload_to_postgres(tech, week_num, csv_path):
     table_suffix_pattern = re.compile(rf"{tech}_wk(\d{{4}})$")
 
     conn = psycopg2.connect(
-        dbname="postgres", user= os.getenv("DB_NADB_USER"), password=os.getenv("DB_NADB_USER"), host="localhost", port="5432"
+        dbname="postgres", user= os.getenv("DB_USER"), password=os.getenv("DB_PASSWORD"), host="localhost", port="5432"
     )
     cur = conn.cursor()
 

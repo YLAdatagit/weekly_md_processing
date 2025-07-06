@@ -1,18 +1,24 @@
-from config import SYNC_JOBS, MASTER_DB_CONFIG
+from config import  MASTER_DB_CONFIG
 from scripts.masterdb_updater import process_master_db
 from scripts.db_uploader import upload_to_postgres
 from scripts.flattened_geojson import create_site_geojson
 
 import logging
+from pathlib import Path
 
-# === Set up logging ===
+# Ensure /log folder exists
+log_path = Path(__file__).resolve().parents[1] / "log"
+log_path.mkdir(parents=True, exist_ok=True)
+
+# Define full log file path
+log_file = log_path / "sync_log.log"
+
+# Set up logging
 logging.basicConfig(
-    filename="sync_log.log",
+    filename=log_file,
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
-
-
 
 def run_masterdb_sync():
     logging.info("=== MasterDB Sync Started ===")
