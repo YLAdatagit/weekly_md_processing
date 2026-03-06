@@ -1,9 +1,6 @@
 import os
 import pandas as pd
-import rarfile
 import subprocess
-
-
 
 def extract_with_winrar(rar_path, extract_to):
     if not os.path.exists(rar_path):
@@ -23,7 +20,6 @@ def extract_with_winrar(rar_path, extract_to):
     else:
         print(f" Extraction successful: {rar_path}")
 
-
 def process_master_db(config):
     week = config["week_num"]
 
@@ -34,33 +30,33 @@ def process_master_db(config):
     extract_to = config["rar_base_path"]
     output_dir = config["output_folder"]
 
-    # 🔓 Step 1: Extract .xlsx from .rar using WinRAR CLI
+    # 1) Extract .xlsx from .rar using WinRAR CLI
     extract_with_winrar(rar_path, extract_to)
 
-    # 📄 Step 2: Load Excel and export cleaned CSVs
+    # 2) Load Excel and export cleaned CSVs
     excel_path = os.path.join(extract_to, excel_file)
     os.makedirs(output_dir, exist_ok=True)
 
     result_paths = {}
 
     for sheet, csv_pattern in config["sheets_to_extract"].items():
-        df = pd.read_excel(excel_path, sheet_name=sheet, header = None)
-        # Step 2: Promote row 1 (index 1) as header
-        df.columns = df.iloc[1]
+        # Read raw (header=None), then promote row index=1 as header
+        df = pd.read_excel(excel_path, sheet_name=sheet, header=None)
+        df.columns = df.iloc[1]  # promote row 1 (Excel row 2) to header
 
-        # Step 3: Drop rows 0 (Excel row 1), 1 (now header), 2 (Excel row 3), 3 (Excel row 4)
-        df_cleaned = df.drop(index=[0, 1, 2, 3], errors='ignore')
+        # Drop top rows: 0 (row1), 1 (header), 2 (row3), 3 (row4)
+        df_cleaned = df.drop(index=[0, 1, 2, 3], errors="ignore").reset_index(drop=True)
+        
+        rename_map = {"eNodeB Name (NE Name)": "enodeb_name", "gNodeB Name (NE Name)": "gnodeb_name"}
 
-        # Step 4: Reset index if needed
-        df_cleaned = df_cleaned.reset_index(drop=True)
+        df_cleaned = df_cleaned.rename(columns={col: rename_map[col] for col in df_cleaned.columns if col in rename_map})
 
         csv_name = csv_pattern.format(week_num=week.upper().replace("WK", "W"))
         csv_path = os.path.join(output_dir, csv_name)
 
-        df_cleaned.to_csv(csv_path, index=False)
+        # Write with utf-8-sig (Excel-friendly BOM)
+        df_cleaned.to_csv(csv_path, index=False, encoding="utf-8-sig")
         result_paths[sheet.lower()] = csv_path
         print(f" Saved cleaned CSV: {csv_path}")
 
     return result_paths["lte"], result_paths["nr"]
-
-

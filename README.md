@@ -1,20 +1,21 @@
 # Weekly MD Processing Pipeline
+(အပတ်စဉ် MasterDB ဒေတာများကို လုပ်ဆောင်သောစနစ်)
 
-This project automates the extraction, transformation, and loading of "MasterDB" weekly data.
+ဤပရောဂျက်သည် "MasterDB" အပတ်စဉ် ဒေတာများကို ဖြည်ချခြင်း (extraction)၊ ပြောင်းလဲခြင်း (transformation) နှင့် ဒေတာဘေ့စ်သို့ ထည့်သွင်းခြင်း (loading) လုပ်ငန်းစဉ်များကို အလိုအလျောက် လုပ်ဆောင်ပေးပါသည်။
 
-## Features
+## Features (လုပ်ဆောင်နိုင်စွမ်းများ)
 
-- Extracts weekly Excel files from RAR archives using WinRAR
-- Cleans LTE and NR worksheets into CSV format
-- Uploads cleaned CSVs into a PostgreSQL database
-- Generates a flattened GeoJSON file for site data
+- WinRAR ကိုအသုံးပြု၍ RAR archive များထဲမှ အပတ်စဉ် Excel ဖိုင်များကို ဖြည်ချပေးခြင်း။
+- LTE နှင့် NR ပိုင်းဆိုင်ရာ worksheet များကို သန့်စင်ပြီး CSV ဖော်မတ်သို့ ပြောင်းလဲပေးခြင်း။
+- သန့်စင်ပြီးသော CSV data များကို PostgreSQL database သို့ အလိုအလျောက် ထည့်သွင်းပေးခြင်း။
+- Site data များအတွက် ဆက်စပ်မှုရှိသော (flattened) GeoJSON ဖိုင်တစ်ခုကို ဖန်တီးပေးခြင်း။
 
-## Requirements
+## Requirements (လိုအပ်ချက်များ)
 
-- Python 3.9+
-- WinRAR available at `C:\Program Files\WinRAR\WinRAR.exe`
-- PostgreSQL database
-- Python packages:
+- Python 3.9 (သို့မဟုတ်) ထို့ထက်အသစ်
+- WinRAR (ပုံမှန်အားဖြင့် `C:\Program Files\WinRAR\WinRAR.exe` တွင် ရှိရမည်)
+- PostgreSQL Database
+- လိုအပ်သော Python packages များ -
   - pandas
   - geopandas
   - shapely
@@ -22,33 +23,44 @@ This project automates the extraction, transformation, and loading of "MasterDB"
   - python-dotenv
   - rarfile
 
-## Setup
+## Setup (ထည့်သွင်းပြင်ဆင်ခြင်း)
 
-1. Install the required Python packages:
+၁။ လိုအပ်သော Python package များကို install လုပ်ပါ -
    ```bash
-   pip install pandas geopandas shapely psycopg2 python-dotenv rarfile
+   pip install -r requirements.txt
    ```
-2. Create a `.env` file in the project root with the following variables:
-   ```bash
-   BASE_DIR=/path/to/data
-   OUTPUT_DIR=/path/to/output
-   DB_NADB_USER=postgres   # used as both user and password
-   WEEK_NUM=WK2523         # optional; auto-generated if omitted
+   (သို့မဟုတ် `pip install pandas geopandas shapely psycopg2 python-dotenv rarfile` ဟုလည်း အသုံးပြုနိုင်ပါသည်။)
+
+၂။ Project root folder ထဲတွင် `.env` အမည်ဖြင့် ဖိုင်တစ်ခု ဖန်တီးပြီး အောက်ပါ အချက်အလက်များကို ထည့်သွင်းပါ -
+   ```env
+   DB_NAME=postgres
+   DB_USER=postgres
+   DB_PASSWORD=your_password
+   DB_HOST=localhost
+   DB_PORT=5432
+
+   BASE_DIR="D:/path/to/data"
+   OUTPUT_DIR="D:/path/to/output"
+
+   region=BMA
+   WEEK_NUM=WK2531
    ```
-3. Ensure WinRAR is installed and accessible at the path mentioned above.
+   *(`BASE_DIR` နှင့် `OUTPUT_DIR` လမ်းကြောင်းများ၊ Database အချက်အလက်များကို မိမိစက်နှင့်အညီ ပြောင်းလဲထည့်သွင်းပါ။ `WEEK_NUM` နှင့် `region` ကို script run သည့်အခါ အလိုအလျောက် ပြောင်းလဲပေးမည်ဖြစ်သည်။)*
 
-## Usage
+၃။ WinRAR ကို စက်ထဲတွင် Install လုပ်ထားပြီး မှန်ကန်သော လမ်းကြောင်းတွင် ရှိနေကြောင်း သေချာစေပါ။
 
-To run the entire process for a specific week:
+## Usage (အသုံးပြုပုံ)
+
+သတ်မှတ်ထားသော အပတ်စဉ် (week) နှင့် ဒေသ (region) တစ်ခုအတွက် လုပ်ငန်းစဉ်တစ်ခုလုံးကို အောက်ပါ command ဖြင့် စတင်အသုံးပြုနိုင်ပါသည် -
+
 ```bash
-python set_week.py WK2523
+python set_date.py WK2531 BMA
 ```
-This updates the `WEEK_NUM` in `.env` and runs the sync.
+(ဥပမာ - `NEA` region အတွက်ဆိုလျှင် `python set_date.py WK2531 NEA` ဟု အသုံးပြုနိုင်ပါသည်။)
 
-You can also run the main script directly:
-```bash
-python -m scripts.main
-```
+ယင်း script သည် `.env` ဖိုင်ထဲရှိ `WEEK_NUM` နှင့် `region` တန်ဖိုးများကို အလိုအလျောက် အပ်ဒိတ်လုပ်ပေးမည်ဖြစ်ပြီး ဖြည်ချခြင်း၊ ဒေတာဘေ့စ်သို့ ထည့်သွင်းခြင်း လုပ်ငန်းစဉ်များကို ဆက်လက်လုပ်ဆောင်သွားမည်ဖြစ်သည်။
 
-Outputs are written to the directory configured in `OUTPUT_DIR` and logs are stored in `sync_log.log`.
+## Outputs (ရလဒ်များ)
 
+- လုပ်ဆောင်ပြီးသော CSV ဖိုင်များနှင့် GeoJSON ဖိုင်များကို `.env` ဖိုင်တွင် သတ်မှတ်ထားသော `OUTPUT_DIR` ဖိုင်တွဲအောက်တွင် တွေ့ရှိနိုင်ပါသည်။
+- လုပ်ငန်းစဉ် မှတ်တမ်းများ (Logs) များကို project folder ထဲရှိ `sync_log.log` ဖိုင်တွင် သိမ်းဆည်းထားမည်ဖြစ်သည်။

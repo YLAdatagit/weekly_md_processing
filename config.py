@@ -19,6 +19,7 @@ def get_week_num():
 # === Load and validate all required configs ===
 base_dir = os.getenv("BASE_DIR")
 output_dir = os.getenv("OUTPUT_DIR")
+region = os.getenv("region")
 week_num = get_week_num()
 
 if not base_dir:
@@ -30,11 +31,11 @@ if not output_dir:
 MASTER_DB_CONFIG = {
     "rar_base_path": Path(base_dir),
     "week_num": week_num,
-    "excel_filename_pattern": f"MasterDB updated process_BMA_{week_num}.xlsx",
-    "rar_filename_pattern": f"MasterDB updated process_BMA_{week_num}.rar",
+    "excel_filename_pattern": f"MasterDB updated process_{region}_{week_num}.xlsx",
+    "rar_filename_pattern": f"MasterDB updated process_{region}_{week_num}.rar",
     "sheets_to_extract": {
-        "LTE": f"MD_LTE_{week_num}.csv",
-        "NR":  f"MD_NR_{week_num}.csv"
+        "LTE": f"MD_LTE_{region}_{week_num}.csv",
+        "NR":  f"MD_NR_{region}_{week_num}.csv"
     },
     "output_folder": Path(output_dir)
 }
